@@ -1,0 +1,1 @@
+document.querySelector('#HelloWorldButton')?.addEventListener('click', e => alert("Hello World"))
