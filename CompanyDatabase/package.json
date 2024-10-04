@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
+    "build": "webpack --config ./webpack.config.js",
+    "build-prod": "webpack --config ./webpack.config.js --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

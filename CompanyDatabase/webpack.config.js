@@ -5,7 +5,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = (env, argv) => {
-  const isProd = argv.mode === 'prod';
+  const isProd = argv.mode === 'production';
 
   return {
     entry: './client/src/index.js', // Entry point for the app
