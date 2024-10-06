@@ -28,12 +28,11 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "module-alias": "^2.2.3"
+    "express": "^4.21.0"
   },
-  "_moduleAliases": {
-    "@root": ".",
-    "@helpers": "helpers",
-    "config": "config.js"
+  "type": "module",
+  "imports": {
+    "#helpers/*": "./helpers/*.js",
+    "#config": "./config.js"
   }
 }
