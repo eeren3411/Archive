@@ -1,16 +1,19 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import path from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import { root } from '#config';
 
-module.exports = (env, argv) => {
+
+
+export default (env, argv) => {
   const isProd = argv.mode === 'production';
 
   return {
     entry: './client/src/index.js', // Entry point for the app
     output: {
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(root, 'dist'),
       filename: 'src/bundle.js', // Output bundle for JS
       clean: true, // Clean the output directory before emit
     },

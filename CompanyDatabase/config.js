@@ -1,6 +1,11 @@
-const path = require('path');
+/**
+ * Port number
+ * @type {number}
+ */
+export const PORT = 3411;
 
-module.exports = {
-    PORT: 3411,
-    root: __dirname
-}
+/**
+ * Project root folder
+ * @type {string}
+ */
+export const root = import.meta.dirname;

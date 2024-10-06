@@ -1,13 +1,10 @@
-require('module-alias/register')
-
-const config = require('config');
-
-const express = require('express');
+import express from 'express';
 const app = express();
 
-const routeHelpers = require('./helpers/routeHelpers');
-routeHelpers.ImportRoutes(app, './routers')
+import { ImportRoutes } from '#helpers/routeHelpers';
+ImportRoutes(app, './routers')
 
-app.listen(config.PORT, () => {
-    console.log(`Server listening on port: ${config.PORT}`);
+import { PORT } from '#config';
+app.listen(PORT, () => {
+    console.log(`Server listening on port: ${PORT}`);
 })

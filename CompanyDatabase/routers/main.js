@@ -1,7 +1,8 @@
-const express = require('express')
-const path = require('path');
-const config = require('config');
-const distPath = path.join(config.root, 'dist');
+import express from 'express';
+import path from 'path';
+import { root } from '#config';
+
+const distPath = path.join(root, 'dist');
 
 const router = express.Router();
 
@@ -11,4 +12,4 @@ router.get(['/', '/main'], (req, res) => {
 
 router.use('/', express.static(distPath));
 
-module.exports = router;
+export { router };

@@ -1,4 +1,8 @@
-const express = require('express');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { root } from '#config';
+
 /**
  * Imports routes from given path, RECURSIVELY
  * Given path is treated as base path, every folder inside the base path will have its own folder in application path
@@ -8,30 +12,24 @@ const express = require('express');
  * @param {string} basePath Base path to start recursion
  * @returns {void}
  */
-function ImportRoutes(app, basePath) {
-    const fs = require('fs');
-    const path = require('path');
-
+export function ImportRoutes(app, basePath) {
     function walk(currentPath) {
-        fs.readdirSync(currentPath).forEach(file => {
-            const fullPath = path.join(currentPath, file);
-            const fileStat = fs.statSync(fullPath);
+        fs.readdirSync(currentPath).forEach(async file => {
+            const filePath = path.join(currentPath, file);
+            const fileStat = fs.statSync(filePath);
 
             if (fileStat.isDirectory()) {
-                walk(fullPath);
+                walk(filePath);
+                return;
             }
-            else if(fileStat.isFile()) {
-                const route = require(`..\\${fullPath}`);
-                const routePath = path.relative(basePath, currentPath)
-                app.use(`/${routePath}`, route);
-                console.log(`File ${file}, loaded into route /${routePath}`);
-            }
+
+            const route = await import(`file://${path.join(root, filePath)}`);
+            const routePath = path.relative(basePath, currentPath)
+            
+            app.use(`/${routePath}`, route.router);
+            console.log(`File ${file}, loaded into route /${routePath}`);
         })
     }
 
     walk(basePath);
-}
-
-module.exports = {
-    ImportRoutes: ImportRoutes,
 }
