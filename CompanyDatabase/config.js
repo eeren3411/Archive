@@ -9,3 +9,9 @@ export const PORT = 3411;
  * @type {string}
  */
 export const root = import.meta.dirname;
+
+/**
+ * Session timeout, defaults to 5 minutes.
+ * @type {number}
+ */
+export const SESSION_TIMEOUT = 5*60*1000; 
