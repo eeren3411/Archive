@@ -8,7 +8,7 @@ export const PORT = 3411;
  * Project root folder
  * @type {string}
  */
-export const root = import.meta.dirname;
+export const ROOT = import.meta.dirname;
 
 /**
  * Session timeout, defaults to 5 minutes.

@@ -5,10 +5,10 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
-import { root } from '#config';
+import { ROOT } from '#config';
 
-const clientPath = path.join(root, 'client');
-const distPath = path.join(root, 'dist');
+const clientPath = path.join(ROOT, 'client');
+const distPath = path.join(ROOT, 'dist');
 
 
 export default (env, argv) => {

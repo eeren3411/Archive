@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { root } from '#config';
+import { ROOT } from '#config';
 
 /**
  * Imports routes from given path, RECURSIVELY
@@ -23,7 +23,7 @@ export function ImportRoutes(app, basePath) {
                 return;
             }
 
-            const route = await import(`file://${path.join(root, filePath)}`);
+            const route = await import(`file://${path.join(ROOT, filePath)}`);
             const routePath = path.relative(basePath, currentPath)
             
             app.use(`/${routePath}`, route.router);
