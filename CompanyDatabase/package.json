@@ -1,7 +1,7 @@
 {
   "name": "companydatabase",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "Server.js",
   "scripts": {
     "build": "webpack --config ./webpack.config.js",
     "build:prod": "webpack --config ./webpack.config.js --mode production",
@@ -44,6 +44,6 @@
   "imports": {
     "#helpers/*": "./helpers/*.js",
     "#middleware/*": "./middleware/*.js",
-    "#config": "./config.js"
+    "#config": "./Config.js"
   }
 }

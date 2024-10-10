@@ -1,7 +1,7 @@
 import express from 'express';
 const app = express();
 
-import { ImportRoutes } from '#helpers/routeHelpers';
+import { ImportRoutes } from '#helpers/RouteHelpers';
 ImportRoutes(app, './routers')
 
 import { PORT } from '#config';
