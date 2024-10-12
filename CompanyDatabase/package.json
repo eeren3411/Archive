@@ -46,6 +46,7 @@
   "imports": {
     "#helpers/*": "./helpers/*.js",
     "#middleware/*": "./middleware/*.js",
+    "#managers/*": "./managers/*.js", 
     "#config": "./Config.js"
   }
 }
