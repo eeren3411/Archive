@@ -1,3 +1,6 @@
+# Company database
 CompanyDatabase/node_modules
 CompanyDatabase/package-lock.json
 CompanyDatabase/dist
+# Until I finish the project
+CompanyDatabase/CompanyDatabase.db
