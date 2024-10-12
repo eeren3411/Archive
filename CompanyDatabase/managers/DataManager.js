@@ -1,4 +1,5 @@
-import Database, {Database as BetterSQLiteDatabase, Statement as BetterSQLiteStatement} from 'better-sqlite3';
+import Database from 'better-sqlite3';
+
 import path from 'path';
 import fs from 'fs';
 
@@ -13,7 +14,7 @@ class DataManager {
 
     /**
      * Database object
-     * @type {BetterSQLiteDatabase}
+     * @type {Database.Database}
      */
     #db;
     constructor() {
@@ -85,36 +86,36 @@ class DataManager {
 
     /**
      * Inserts data to config table
-     * @type {BetterSQLiteStatement<[string, string]>}
+     * @type {Database.Statement<[string, string]>}
      */
     #setConfig;
 
     /**
      * Gets config variable by key from config table
-     * @type {BetterSQLiteStatement<[string], {key: string, value: string}>}
+     * @type {Database.Statement<[string], {key: string, value: string}>}
      */
     #getConfig
 
     /**
      * Gets all the companies.
-     * @type {BetterSQLiteStatement<[],{id: number, fake_name: string, real_name: string, info: string?}>}
+     * @type {Database.Statement<[],{id: number, fake_name: string, real_name: string, info: string?}>}
      */
     #getCompanies
     /**
      * Inserts new company to company table
-     * @type {BetterSQLiteStatement<[string, string, string?]>}
+     * @type {Database.Statement<[string, string, string?]>}
      */
     #insertCompany
 
     /**
      * Deletes company from company table
-     * @type {BetterSQLiteStatement<[string]>}
+     * @type {Database.Statement<[string]>}
      */
     #removeCompany
 
     /**
      * Updates company at company table
-     * @type {BetterSQLiteStatement<[string, string, string, string]>}
+     * @type {Database.Statement<[string, string, string, string]>}
      */
     #updateCompany
 
