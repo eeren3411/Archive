@@ -222,24 +222,27 @@ class DataManager {
         return this.#updateCompany.run(fake_name, real_name, info, id).changes > 0;
     }
 
+    #RunTransaction(callback) {
+        const transaction = this.#db.transaction(callback);
+        try {
+            transaction();
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
     /**
      * Inserts multiple companies into the companies table.
      * @param {[{fake_name: string, real_name: string, info: string?}]} companies
      * @returns {boolean} if the operation is successful.
      */
     InsertCompanyBulk(companies) {
-        const transaction = this.#db.transaction((companies) => {
+        return this.#RunTransaction(() => {
             for (const { fake_name, real_name, info } of companies) {
                 this.#insertCompany.run(fake_name, real_name, info);
             }
         });
-
-        try {
-            transaction(companies);
-            return true;
-        } catch (error) {
-            return false;
-        }
     }
 
     /**
@@ -248,18 +251,11 @@ class DataManager {
      * @returns {boolean} if the operation is successful.
      */
     RemoveCompanyBulk(ids) {
-        const transaction = this.#db.transaction((ids) => {
+        return this.#RunTransaction(() => {
             for (const id of ids) {
                 this.#removeCompany.run(id);
             }
         });
-
-        try {
-            transaction(ids);
-            return true;
-        } catch (error) {
-            return false;
-        }
     }
 
     /**
@@ -268,18 +264,11 @@ class DataManager {
      * @returns {boolean} if the operation is successful.
      */
     UpdateCompanyBulk(companies) {
-        const transaction = this.#db.transaction((companies) => {
+        return this.#RunTransaction(() => {
             for (const { id, fake_name, real_name, info } of companies) {
                 this.#updateCompany.run(fake_name, real_name, info, id);
             }
         });
-
-        try {
-            transaction(companies);
-            return true;
-        } catch (error) {
-            return false;
-        }
     }
 
     /**
