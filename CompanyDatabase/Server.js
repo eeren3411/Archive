@@ -46,6 +46,11 @@ app.use(express.json(), (err, req, res, next) => {
     }
 });
 
+// Handle cookies
+import cookieParser from 'cookie-parser';
+app.use(cookieParser());
+
+// Import routes
 import { ImportRoutes } from '#helpers/RouteHelpers';
 import expressListEndpoints from 'express-list-endpoints';
 ImportRoutes(app, './routers').then(() => {
