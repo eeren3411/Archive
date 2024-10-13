@@ -101,6 +101,12 @@ class DataManager {
      * @type {Database.Statement<[],{id: number, fake_name: string, real_name: string, info: string?}>}
      */
     #getCompanies
+
+    /**
+     * Get company by id
+     * @type {Database.Statement<[number], {id: number, fake_name: string, real_name: string, info: string?}>}
+     */
+    #getCompany
     /**
      * Inserts new company to company table
      * @type {Database.Statement<[string, string, string?]>}
@@ -127,6 +133,7 @@ class DataManager {
         this.#getConfig = this.#db.prepare('SELECT key, value FROM config WHERE key = ?');
 
         this.#getCompanies = this.#db.prepare('SELECT id, fake_name, real_name, info FROM companies');
+        this.#getCompany = this.#db.prepare('SELECT id, fake_name, real_name, info FROM companies WHERE id = ?');
         this.#insertCompany = this.#db.prepare('INSERT INTO companies (fake_name, real_name, info) VALUES (?, ?, ?)');
         this.#removeCompany = this.#db.prepare('DELETE FROM companies WHERE id = ?');
         this.#updateCompany = this.#db.prepare('UPDATE companies SET fake_name = ?, real_name = ?, info = ? WHERE id = ?');
@@ -140,7 +147,7 @@ class DataManager {
             );
             CREATE TABLE IF NOT EXISTS companies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                fake_name TEXT NOT NULL,
+                fake_name TEXT NOT NULL UNIQUE,
                 real_name TEXT NOT NULL,
                 info TEXT
             );
@@ -173,6 +180,16 @@ class DataManager {
     GetCompanies() {
         return this.#getCompanies.all();
     }
+
+    /**
+     * Gets company by id.
+     * @param {number} id Company id
+     * @returns {{id: number, fake_name: string, real_name: string, info: string?}}
+     */
+    GetCompany(id) {
+        return this.#getCompany.get(id);
+    }
+
     /**
      * Inserts company to the companies table.
      * @param {string} fake_name fake_name of the company.

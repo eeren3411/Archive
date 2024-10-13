@@ -13,7 +13,7 @@ export function SessionValidatorMW(req, res, next) {
 
     if (!result) return res.status(StatusCodes.UNAUTHORIZED).send({error: "Invalid Session"});
 
-    res.cookie('sessionid', req.header['sessionid'], {
+    res.cookie('sessionid', req.cookies['sessionid'], {
         httpOnly: true,
         sameSite: 'strict',
         maxAge: SESSION_TIMEOUT
