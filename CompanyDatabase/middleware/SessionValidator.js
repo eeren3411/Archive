@@ -1,12 +1,11 @@
 import { SessionManagerInstance } from '../managers/SessionManager';
-import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 /**
  * 
- * @param {Request} req 
- * @param {Response} res 
- * @param {NextFunction} next 
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ * @param {import('express').NextFunction} next 
  */
 export function SessionValidator(req,res, next) {
     const SessionID = req.headers['sessionid'];
