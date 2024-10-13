@@ -1,8 +1,8 @@
 import express from 'express';
 import path from 'path';
-import { root } from '#config';
+import { ROOT } from '#config';
 
-const distPath = path.join(root, 'dist');
+const distPath = path.join(ROOT, 'dist');
 
 const router = express.Router();
 
