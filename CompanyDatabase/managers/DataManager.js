@@ -140,7 +140,7 @@ class DataManager {
             );
             CREATE TABLE IF NOT EXISTS companies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                fake_name TEXT NOT NULL,
+                fake_name TEXT NOT NULL UNIQUE,
                 real_name TEXT NOT NULL,
                 info TEXT
             );
