@@ -54,6 +54,7 @@ class SessionManager {
      */
     CreateSession(req) {
         const session = new Session(req.ip, req.headers['user-agent']);
+        
         session.DeleteTimeout = setTimeout(() => {
             this.DeleteSession(session.SessionID);
         }, SESSION_TIMEOUT);
@@ -66,16 +67,18 @@ class SessionManager {
     /**
      * Returns if session is valid or not.
      * Resets timeout.
-     * @param {string} SessionID 
      * @param {import('express').Request} req
      * @returns {boolean} Is session valid
      */
-    Validate(SessionID, req) {
-        const session = this.#ActiveSessions.get(SessionID);
+    Validate(req) {
+        const session = this.#ActiveSessions.get(req.header['sessionid']);
 
-        if (!session) return false;
-        if (session.IP !== req.ip) return false;
-        if (session.UserAgent !== req.headers['user-agent']) return false;
+        if (!session ||
+            session.IP !== req.ip ||
+            session.UserAgent !== req.headers['user-agent']
+        ) {
+            return false;
+        }
 
         clearTimeout(session.DeleteTimeout);
         session.DeleteTimeout = setTimeout(() => {
