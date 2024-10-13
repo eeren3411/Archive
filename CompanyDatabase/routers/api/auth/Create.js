@@ -1,4 +1,3 @@
-import { SessionManagerInstance } from '#managers/SessionManager';
 import { DataManagerInstance } from '#managers/DataManager';
 import { CreateSessionMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
