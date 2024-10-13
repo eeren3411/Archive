@@ -54,7 +54,7 @@ class SessionManager {
      */
     CreateSession(req) {
         const session = new Session(req.ip, req.headers['user-agent']);
-        
+
         session.DeleteTimeout = setTimeout(() => {
             this.DeleteSession(session.SessionID);
         }, SESSION_TIMEOUT);
@@ -71,7 +71,7 @@ class SessionManager {
      * @returns {boolean} Is session valid
      */
     Validate(req) {
-        const session = this.#ActiveSessions.get(req.header['sessionid']);
+        const session = this.#ActiveSessions.get(req.cookies['sessionid']);
 
         if (!session ||
             session.IP !== req.ip ||
