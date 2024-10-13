@@ -10,26 +10,28 @@ import { ROOT } from '#config';
  * eg. basePath/temp/router2.js -> app/temp/router2Path
  * @param {express.Application} app  Express application
  * @param {string} basePath Base path to start recursion
- * @returns {void}
+ * @returns {Promise}
  */
-export function ImportRoutes(app, basePath) {
-    function walk(currentPath) {
-        fs.readdirSync(currentPath).forEach(async file => {
+export async function ImportRoutes(app, basePath) {
+    async function walk(currentPath) {
+        const promises = fs.readdirSync(currentPath).map(async file => {
             const filePath = path.join(currentPath, file);
             const fileStat = fs.statSync(filePath);
 
             if (fileStat.isDirectory()) {
-                walk(filePath);
+                await walk(filePath);
                 return;
             }
 
             const route = await import(`file://${path.join(ROOT, filePath)}`);
-            const routePath = path.relative(basePath, currentPath)
+            const routePath = path.relative(basePath, currentPath).replaceAll('\\', '/');
             
             app.use(`/${routePath}`, route.router);
             console.log(`File ${file}, loaded into route /${routePath}`);
         })
+
+        return Promise.all(promises);
     }
 
-    walk(basePath);
+    await walk(basePath);
 }

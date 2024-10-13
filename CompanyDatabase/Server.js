@@ -25,15 +25,14 @@ function BeforeShutdown(signal, reason, promise) {
 ['SIGINT', 'SIGTERM', 'SIGUSR1', 'SIGUSR2'].forEach(signal => {
     process.on(signal, () => BeforeShutdown(signal));
 });
-
 process.on('uncaughtException', (err) => {
     BeforeShutdown('uncaughtException', err);
 });
-
 process.on('unhandledRejection', (reason, promise) => {
     BeforeShutdown('unhandledRejection', reason, promise);
 });
 
+// Start expres server 
 import express from 'express';
 const app = express();
 
@@ -48,8 +47,12 @@ app.use(express.json(), (err, req, res, next) => {
 });
 
 import { ImportRoutes } from '#helpers/RouteHelpers';
-ImportRoutes(app, './routers')
+import expressListEndpoints from 'express-list-endpoints';
+ImportRoutes(app, './routers').then(() => {
+    console.log(expressListEndpoints(app));
+})
 
+// Listen
 import { PORT } from '#config';
 app.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
