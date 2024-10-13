@@ -37,6 +37,16 @@ process.on('unhandledRejection', (reason, promise) => {
 import express from 'express';
 const app = express();
 
+// Handle request syntax errors
+import { StatusCodes } from 'http-status-codes';
+app.use(express.json(), (err, req, res, next) => {
+    if (err instanceof SyntaxError) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            error: "Syntax Error!"
+        });
+    }
+});
+
 import { ImportRoutes } from '#helpers/RouteHelpers';
 ImportRoutes(app, './routers')
 
