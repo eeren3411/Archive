@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { SESSION_TIMEOUT } from '#config';
 
 class Session {
@@ -48,12 +49,11 @@ class SessionManager {
 
     /**
      * Creates new session and returns Session ID.
-     * @param {string?} IP 
-     * @param {string?} UserAgent 
+     * @param {import('express').Request} req
      * @returns {string} Session ID
      */
-    CreateSession(IP, UserAgent) {
-        const session = new Session(IP, UserAgent);
+    CreateSession(req) {
+        const session = new Session(req.ip, req.headers['user-agent']);
         session.DeleteTimeout = setTimeout(() => {
             this.DeleteSession(session.SessionID);
         }, SESSION_TIMEOUT);
@@ -67,16 +67,15 @@ class SessionManager {
      * Returns if session is valid or not.
      * Resets timeout.
      * @param {string} SessionID 
-     * @param {string?} IP 
-     * @param {string?} UserAgent
+     * @param {import('express').Request} req
      * @returns {boolean} Is session valid
      */
-    Validate(SessionID, IP, UserAgent) {
+    Validate(SessionID, req) {
         const session = this.#ActiveSessions.get(SessionID);
 
         if (!session) return false;
-        if (session.IP !== IP) return false;
-        if (session.UserAgent !== UserAgent) return false;
+        if (session.IP !== req.ip) return false;
+        if (session.UserAgent !== req.headers['user-agent']) return false;
 
         clearTimeout(session.DeleteTimeout);
         session.DeleteTimeout = setTimeout(() => {
