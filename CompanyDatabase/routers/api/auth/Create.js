@@ -1,3 +1,4 @@
+import { BodyFieldChecker } from '#middleware/FieldCheckerMW';
 import { DataManagerInstance } from '#managers/DataManager';
 import { CreateSessionMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
@@ -12,13 +13,6 @@ import express from 'express';
  * @returns {void}
  */
 function CraeteRulesMW(req, res, next) {
-
-    if (!req.body.salt && !req.body.checksum) {
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-            error: "Missing parameters (Salt or Checksum)"
-        })
-    }
-
     if (DataManagerInstance.GetConfig('salt')) {
         return res.status(StatusCodes.CONFLICT).json({
             error: "Database already exists"
@@ -30,7 +24,7 @@ function CraeteRulesMW(req, res, next) {
 
 
 const router = express.Router();
-router.post('/create', CraeteRulesMW, CreateSessionMW, (req, res, next) => {
+router.post('/create', BodyFieldChecker('salt', 'checksum'), CraeteRulesMW, CreateSessionMW, (req, res, next) => {
     const salt = req.body.salt.toString();
     const checksum = req.body.checksum.toString();
     DataManagerInstance.SetConfig('salt', salt);
