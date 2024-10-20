@@ -5,6 +5,29 @@ import fs from 'fs';
 
 import { ROOT, DATABASE_FILENAME, DATABASE_ARCHIVE_FOLDER } from "#config";
 
+/**
+ * Error codes
+ * @type {{SQLITE_CONSTRAINT_UNIQUE: string, CONFIG_NOT_FOUND: string, COMPANY_NOT_FOUND: string}}
+ */
+export const ErrorCodes = {
+    SQLITE_CONSTRAINT_UNIQUE: "SQLITE_CONSTRAINT_UNIQUE",
+    CONFIG_NOT_FOUND: "CONFIG_NOT_FOUND",
+    COMPANY_NOT_FOUND: "COMPANY_NOT_FOUND"
+}
+
+class DatabaseError extends Error {
+    /**
+     * Constructor for a DatabaseError
+     * @param {string} message - A human-readable error message
+     * @param {string} code - An error code defined in ErrorCodes Object
+     */
+    constructor(message, code) {
+        super(message);
+        this.code = code;
+    }
+}
+
+
 class DataManager {
     /**
      * Database file path
@@ -49,7 +72,6 @@ class DataManager {
         }
 
         this.#prepareMethods();
-
     }
 
     /**
@@ -58,9 +80,7 @@ class DataManager {
      * Details:
      * 
      * If either checksum or salt is available in config table, other should be available too. If not, database is corrupted.
-     * 
      * If companies table have keys but either checksum or salt is missing, database is corrupted. 
-     * 
      * @returns {bool} Returns true if the database is intact, false if corrupted.
      */
     #validateDatabase() {
@@ -155,39 +175,70 @@ class DataManager {
     }
 
     /**
-     * Returns value from config table
+     * Safely executes a callback function and handles any errors.
+     * @param {Function} callback - The function to execute.
+     * @returns {{error?: DatabaseError, data?: any}} Returns the result of the callback or an error object.
+     */
+    #SafeExecution(callback) {
+        try {
+            return callback();
+        } catch (err) {
+            return { error: err };
+        }
+    }
+
+    /**
+     * Returns config value by key
      * @param {string} key key
-     * @returns {string} Value
+     * @returns {{error?: DatabaseError, data?: string}} Data: config value
      */
     GetConfig(key) {
-        return this.#getConfig.get(key)?.value;
+        return this.#SafeExecution(() => {
+            const result = this.#getConfig.get(key);
+            if (!result) {
+                throw new DatabaseError(`Config variable ${key} does not exist`, ErrorCodes.CONFIG_NOT_FOUND);
+            }
+            return { data: result.value };
+        })
     }
 
     /**
      * Sets key-value pairs in config table
      * @param {string} key key
      * @param {string} value value
-     * @returns {boolean} if operation is successful.
+     * @returns {{error?: DatabaseError, data?: {key: string, value: string}}} Data: {key: string, value: string}
      */
     SetConfig(key, value) {
-        return this.#setConfig.run(key, value).changes > 0;
+        return this.#SafeExecution(() => {
+            const result = this.#setConfig.run(key, value);
+            return { data: { key: key, value: value } };
+        })
     }
 
     /**
      * Returns all company data.
-     * @returns {[{id: number, fake_name: string, real_name: string, info: string?}]}
+     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Companies
      */
     GetCompanies() {
-        return this.#getCompanies.all();
+        return this.#SafeExecution(() => {
+            const result = this.#getCompanies.all();
+            return { data: result };
+        })
     }
 
     /**
      * Gets company by id.
      * @param {number} id Company id
-     * @returns {{id: number, fake_name: string, real_name: string, info: string?}}
+     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Company
      */
     GetCompany(id) {
-        return this.#getCompany.get(id);
+        return this.#SafeExecution(() => {
+            const result = this.#getCompany.get(id);
+            if (!result) {
+                throw new DatabaseError(`Company with id ${id} does not exist`, ErrorCodes.COMPANY_NOT_FOUND);
+            }
+            return { data: result };
+        })
     }
 
     /**
@@ -195,19 +246,40 @@ class DataManager {
      * @param {string} fake_name fake_name of the company.
      * @param {string} real_name real_name of the company.
      * @param {string?} info extra information about company.
-     * @returns {boolean} if operation is successful.
+     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Inserted company
      */
-    InsertCompany(fake_name, real_name, info) {
-        return this.#insertCompany.run(fake_name, real_name, info).changes > 0;
+    InsertCompany(fake_name, real_name, info = null) {
+        return this.#SafeExecution(() => {
+            try {
+                const result = this.#insertCompany.run(fake_name, real_name, info);
+                return { data: {
+                    id: result.lastInsertRowid,
+                    fake_name: fake_name,
+                    real_name: real_name,
+                    info: info
+                } };
+            } catch (err) {
+                if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+                    throw new DatabaseError(`Company with fake_name ${fake_name} already exists`, ErrorCodes.SQLITE_CONSTRAINT_UNIQUE);
+                }
+                throw err;
+            }
+        })
     }
 
     /**
      * Removes specified company
      * @param {number} id Company id
-     * @returns {boolean} if operation is successful.
+     * @returns {{error?: DatabaseError, data?: number}} Data: Deleted company id
      */
     RemoveCompany(id) {
-        return this.#removeCompany.run(id).changes > 0;
+        return this.#SafeExecution(() => {
+            const result = this.#removeCompany.run(id);
+            if (result.changes === 0) {
+                throw new DatabaseError(`Company with id ${id} does not exist`, ErrorCodes.COMPANY_NOT_FOUND)
+            }
+            return { data: id };
+        })
     }
 
     /**
@@ -216,68 +288,110 @@ class DataManager {
      * @param {string} fake_name New fake_name
      * @param {string} real_name New real_name
      * @param {string?} info New info
-     * @returns {boolean} if operation is successful.
+     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Updated company
      */
-    UpdateCompany(id, fake_name, real_name, info) {
-        return this.#updateCompany.run(fake_name, real_name, info, id).changes > 0;
-    }
-
-    #RunTransaction(callback) {
-        const transaction = this.#db.transaction(callback);
-        try {
-            transaction();
-            return true;
-        } catch (error) {
-            return false;
-        }
+    UpdateCompany(id, fake_name, real_name, info = null) {
+        return this.#SafeExecution(() => {
+            const result = this.#updateCompany.run(fake_name, real_name, info, id);
+            if (result.changes === 0) {
+                throw new DatabaseError(`Company with id ${id} does not exist`, ErrorCodes.COMPANY_NOT_FOUND)
+            }
+            return { data: {
+                id: id,
+                fake_name: fake_name,
+                real_name: real_name,
+                info: info
+            } };
+        })
     }
 
     /**
      * Inserts multiple companies into the companies table.
      * @param {[{fake_name: string, real_name: string, info: string?}]} companies
-     * @returns {boolean} if the operation is successful.
+     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Inserted companies
      */
     InsertCompanyBulk(companies) {
-        return this.#RunTransaction(() => {
-            for (const { fake_name, real_name, info } of companies) {
-                this.#insertCompany.run(fake_name, real_name, info);
-            }
-        });
+        return this.#SafeExecution(() => {
+            const insertedCompanies = [];
+
+            const transaction = this.#db.transaction(() => {
+                for (const { fake_name, real_name, info } of companies) {
+                    try {
+                        const result = this.#insertCompany.run(fake_name, real_name, info ?? null);
+                        insertedCompanies.push({
+                            id: result.lastInsertRowid,
+                            fake_name: fake_name,
+                            real_name: real_name,
+                            info: info
+                        });
+                    } catch (err) {
+                        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+                            throw new DatabaseError(`Company with fake_name ${fake_name} already exists`, ErrorCodes.SQLITE_CONSTRAINT_UNIQUE);
+                        }
+                        throw err;
+                    }
+                }
+            })
+
+            transaction(); // If transaction fails with SQLITE_CONSTRAINT_UNIQUE, it should be catched at SafeExecution level
+            return { data: insertedCompanies };
+        })
     }
 
     /**
      * Deletes multiple companies from the companies table.
      * @param {[number]} ids - Array of company IDs to delete.
-     * @returns {boolean} if the operation is successful.
+     * @returns {{error?: DatabaseError, data?: [number]}} Data: Deleted company IDs
      */
     RemoveCompanyBulk(ids) {
-        return this.#RunTransaction(() => {
-            for (const id of ids) {
-                this.#removeCompany.run(id);
-            }
+        return this.#SafeExecution(() => {
+            const transaction = this.#db.transaction(() => {
+                for (const id of ids) {
+                    const result = this.#removeCompany.run(id);
+                    if (result.changes === 0) {
+                        throw new DatabaseError(`Company with id ${id} does not exist`, ErrorCodes.COMPANY_NOT_FOUND);
+                    }
+                }
+            });
+
+            transaction(); // Any error including the one I throw, will be catched at SafeExecution level
+            return { data: ids };
         });
     }
 
     /**
      * Updates multiple companies by their IDs.
      * @param {[{id: number, fake_name: string, real_name: string, info: string?}]} companies
-     * @returns {boolean} if the operation is successful.
+     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Updated companies
      */
     UpdateCompanyBulk(companies) {
-        return this.#RunTransaction(() => {
-            for (const { id, fake_name, real_name, info } of companies) {
-                this.#updateCompany.run(fake_name, real_name, info, id);
-            }
+        return this.#SafeExecution(() => {
+            const transaction = this.#db.transaction(() => {
+                for (const { id, fake_name, real_name, info } of companies) {
+                    const result = this.#updateCompany.run(fake_name, real_name, info ?? null, id);
+                    if (result.changes === 0) {
+                        throw new DatabaseError(`Company with id ${id} does not exist`, ErrorCodes.COMPANY_NOT_FOUND);
+                    }
+                }
+            });
+
+            transaction(); // Any error including the one I throw, will be catched at SafeExecution level
+            return { data: companies };
         });
     }
 
     /**
      * Closes the database connection
+     * @returns {{error?: DatabaseError, data?: boolean}} Data: is database closed
      */
     Dispose() {
-        this.#db.close();
+        return this.#SafeExecution(() => {
+            this.#db.close();
+            return { data: true };
+        })
     }
 }
+
 
 /**
  * Singleton DataManager instance to interact with database.
