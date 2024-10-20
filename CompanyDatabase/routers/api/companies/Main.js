@@ -1,30 +1,10 @@
+import { BodyFieldChecker } from '#middleware/FieldCheckerMW';
 import { DataManagerInstance } from '#managers/DataManager';
 import { SessionValidatorMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
 import express from 'express';
 
-/**
- * Checks if the real_name and fake_name exists in the request body.
- * Returns 422 if the parameters are missing.
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
- * @returns {void}
- */
-function CompanyRulesMW(req, res, next) {
-    if (!req.body?.real_name ||
-        !req.body?.fake_name
-    ) {
-        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-            error: "Missing parameters (Real Name or Fake Name)"
-        })
-    }
-
-    return next();
-}
-
 const router = express.Router();
-
 /**
  * Gets all companies
  * @method GET
@@ -40,7 +20,7 @@ router.get('/', SessionValidatorMW, (req, res, next) => {
  * @method POST
  * @route POST api/companies
  */
-router.post('/', SessionValidatorMW, CompanyRulesMW,(req, res, next) => {
+router.post('/', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'), (req, res, next) => {
     try {
         DataManagerInstance.InsertCompany(req.body.fake_name, req.body.real_name, req.body.info);
 
@@ -97,7 +77,7 @@ router.delete('/:id', SessionValidatorMW, (req, res, next) => {
  * @method PUT
  * @route PUT api/companies/:id
  */
-router.put('/:id', SessionValidatorMW, CompanyRulesMW, (req, res, next) => {
+router.put('/:id', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'), (req, res, next) => {
     try {
         const result = DataManagerInstance.UpdateCompany(req.params.id, req.body.fake_name, req.body.real_name, req.body.info);
 
