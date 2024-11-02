@@ -1,4 +1,4 @@
-import { BodyFieldChecker } from '#middleware/FieldCheckerMW';
+import { BodyFieldChecker, QueryFieldChecker } from '#middleware/FieldCheckerMW';
 import { DataManagerInstance, DatabaseErrorCodes } from '#managers/DataManager';
 import { SessionValidatorMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
@@ -6,15 +6,37 @@ import express from 'express';
 
 const router = express.Router();
 /**
- * Gets all companies
+ * Gets all companies or a company by id
  * @method GET
  * @route GET api/companies
  */
 router.get('/', SessionValidatorMW, (req, res, next) => {
-    const result = DataManagerInstance.GetCompanies();
-    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    if (!req.query?.id) {
+        const result = DataManagerInstance.GetCompanies();
+        if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
 
-    res.status(StatusCodes.OK).json(result.data);
+        return res.status(StatusCodes.OK).json(result.data);
+    }
+
+    const id = parseInt(req.query?.id);
+    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "ID must be a number"
+    });
+
+    const result = DataManagerInstance.GetCompany(id);
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.COMPANY_NOT_FOUND) return res.status(StatusCodes.NOT_FOUND).json({
+            error: result.error.message
+        });
+
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
+        });
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    }
+
+    return res.status(StatusCodes.OK).json(result.data);
 })
 
 /**
@@ -41,44 +63,16 @@ router.post('/', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'),
 });
 
 /**
- * Gets a company by id
- * @method GET
- * @route GET api/companies/:id
- */
-router.get('/:id', SessionValidatorMW, (req, res, next) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
-        error: "ID must be a number"
-    })
-
-    const result = DataManagerInstance.GetCompany(id);
-
-    if (result.error) {
-        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
-            error: result.error.message
-        })
-
-        if (result.error.code === DatabaseErrorCodes.COMPANY_NOT_FOUND) return res.status(StatusCodes.NOT_FOUND).json({
-            error: result.error.message
-        })
-
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
-    }
-
-    return res.status(StatusCodes.OK).json(result.data);
-})
-
-/**
  * Removes a company by id
  * @method DELETE
- * @route DELETE api/companies/:id
+ * @route DELETE api/companies
  */
-router.delete('/:id', SessionValidatorMW, (req, res, next) => {
-    const id = parseInt(req.params.id);
+router.delete('/', SessionValidatorMW, QueryFieldChecker('id'), (req, res, next) => {
+    const id = parseInt(req.query?.id);
     if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
         error: "ID must be a number"
     })
-
+    
     const result = DataManagerInstance.RemoveCompany(id);
 
     if (result.error) {
@@ -100,15 +94,10 @@ router.delete('/:id', SessionValidatorMW, (req, res, next) => {
 /**
  * Updates a company by id
  * @method PUT
- * @route PUT api/companies/:id
+ * @route PUT api/companies
  */
-router.put('/:id', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'), (req, res, next) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
-        error: "ID must be a number"
-    })
-
-    const result = DataManagerInstance.UpdateCompany(id, req.body.fake_name, req.body.real_name, req.body.info);
+router.put('/', SessionValidatorMW, BodyFieldChecker('id', 'fake_name', 'real_name'), (req, res, next) => {
+    const result = DataManagerInstance.UpdateCompany(req.body.id, req.body.fake_name, req.body.real_name, req.body.info);
 
     if (result.error) {
         if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
