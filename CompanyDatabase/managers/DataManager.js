@@ -206,6 +206,7 @@ class DataManager {
         try {
             return { data: callback() };
         } catch (err) {
+            if (!(err instanceof DatabaseError)) console.error(err);
             return { error: err };
         }
     }
