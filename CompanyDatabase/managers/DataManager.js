@@ -200,7 +200,7 @@ class DataManager {
     /**
      * Safely executes a callback function and handles any errors.
      * @param {Function} callback - The function to execute.
-     * @returns {{error?: DatabaseError, data?: any}} Returns the result of the callback or an error object.
+     * @returns {{error?: Error, data?: any}} Returns the result of the callback or an error object.
      */
     #SafeExecution(callback) {
         try {
@@ -227,7 +227,8 @@ class DataManager {
     /**
      * Returns config value by key
      * @param {string} key key
-     * @returns {{error?: DatabaseError, data?: string}} Data: config value
+     * @returns {{error?: Error, data?: string}} Data: config value
+     * @throws {DatabaseError} INPUT_NOT_VALID
      */
     GetConfig(key) {
         return this.#SafeExecution(() => {
@@ -259,7 +260,8 @@ class DataManager {
      * Sets key-value pairs in config table
      * @param {string} key key
      * @param {string} value value
-     * @returns {{error?: DatabaseError, data?: {key: string, value: string}}} Data: {key: string, value: string}
+     * @returns {{error?: Error, data?: {key: string, value: string}}} Data: {key: string, value: string}
+     * @throws {DatabaseError} INPUT_NOT_VALID
      */
     SetConfig(key, value) {
         return this.#SafeExecution(() => {
@@ -280,7 +282,7 @@ class DataManager {
 
     /**
      * Returns all company data.
-     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Companies
+     * @returns {{error?: Error, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Companies
      */
     GetCompanies() {
         return this.#SafeExecution(() => {
@@ -292,7 +294,7 @@ class DataManager {
      * UNSAFE: GetCompany
      * @param {number} id 
      * @returns {{id: number, fake_name: string, real_name: string, info?: string}}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     #GetCompany(id) {
         const result = this.#getCompany.get({
@@ -305,7 +307,9 @@ class DataManager {
     /**
      * Gets company by id.
      * @param {number} id Company id
-     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Company
+     * @returns {{error?: Error, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Company
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     GetCompany(id) {
         return this.#SafeExecution(() => {
@@ -321,7 +325,7 @@ class DataManager {
      * @param {string} real_name 
      * @param {string?} info 
      * @returns {{id: number, fake_name: string, real_name: string, info?: string}}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     #InsertCompany(fake_name, real_name, info = null) {
         try {
@@ -346,7 +350,9 @@ class DataManager {
      * @param {string} fake_name fake_name of the company.
      * @param {string} real_name real_name of the company.
      * @param {string?} info extra information about company.
-     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Inserted company
+     * @returns {{error?: Error, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Inserted company
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     InsertCompany(fake_name, real_name, info = null) {
         return this.#SafeExecution(() => {
@@ -361,7 +367,7 @@ class DataManager {
      * UNSAFE: RemoveCompany
      * @param {number} id 
      * @returns {number}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     #RemoveCompany(id) {
         const result = this.#removeCompany.run({
@@ -374,7 +380,9 @@ class DataManager {
     /**
      * Removes specified company
      * @param {number} id Company id
-     * @returns {{error?: DatabaseError, data?: number}} Data: Deleted company id
+     * @returns {{error?: Error, data?: number}} Data: Deleted company id
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     RemoveCompany(id) {
         return this.#SafeExecution(() => {
@@ -391,7 +399,8 @@ class DataManager {
      * @param {string} real_name 
      * @param {string?} info 
      * @returns  {{id: number, fake_name: string, real_name: string, info?: string}}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     #UpdateCompany(id, fake_name, real_name, info = null) {
         try {
@@ -420,7 +429,10 @@ class DataManager {
      * @param {string} fake_name New fake_name
      * @param {string} real_name New real_name
      * @param {string?} info New info
-     * @returns {{error?: DatabaseError, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Updated company
+     * @returns {{error?: Error, data?: {id: number, fake_name: string, real_name: string, info?: string}}} Data: Updated company
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     UpdateCompany(id, fake_name, real_name, info = null) {
         return this.#SafeExecution(() => {
@@ -436,7 +448,7 @@ class DataManager {
      * UNSAFE: InsertCompanyBulk
      * @param {[{fake_name: string, real_name: string, info?: string}]} companies 
      * @returns {[{id: number, fake_name: string, real_name: string, info?: string}]}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     #InsertCompanyBulk(companies) {
         const insertedCompanies = [];
@@ -455,7 +467,9 @@ class DataManager {
     /**
      * Inserts multiple companies into the companies table.
      * @param {[{fake_name: string, real_name: string, info?: string}]} companies
-     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Inserted companies
+     * @returns {{error?: Error, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Inserted companies
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     InsertCompanyBulk(companies) {
         return this.#SafeExecution(() => {
@@ -473,6 +487,7 @@ class DataManager {
      * UNSAFE: RemoveCompanyBulk
      * @param {[number]} ids 
      * @returns {[number]}
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     #RemoveCompanyBulk(ids) {
         const transaction = this.#db.transaction(() => {
@@ -488,7 +503,9 @@ class DataManager {
     /**
      * Deletes multiple companies from the companies table.
      * @param {[number]} ids - Array of company IDs to delete.
-     * @returns {{error?: DatabaseError, data?: [number]}} Data: Deleted company IDs
+     * @returns {{error?: Error, data?: [number]}} Data: Deleted company IDs
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     RemoveCompanyBulk(ids) {
         return this.#SafeExecution(() => {
@@ -503,7 +520,8 @@ class DataManager {
      * UNSAFE: UpdateCompanyBulk
      * @param {[{id: number, fake_name: string, real_name: string, info?: string}]} companies 
      * @returns {[{id: number, fake_name: string, real_name: string, info?: string}]}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     #UpdateCompanyBulk(companies) {
         const transaction = this.#db.transaction(() => {
@@ -518,7 +536,10 @@ class DataManager {
     /**
      * Updates multiple companies by their IDs.
      * @param {[{id: number, fake_name: string, real_name: string, info?: string}]} companies
-     * @returns {{error?: DatabaseError, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Updated companies
+     * @returns {{error?: Error, data?: [{id: number, fake_name: string, real_name: string, info?: string}]}} Data: Updated companies
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
      */
     UpdateCompanyBulk(companies) {
         return this.#SafeExecution(() => {
@@ -534,7 +555,7 @@ class DataManager {
 
     /**
      * Closes the database connection
-     * @returns {{error?: DatabaseError, data?: boolean}} Data: is database closed
+     * @returns {{error?: Error, data?: boolean}} Data: is database closed
      */
     Dispose() {
         return this.#SafeExecution(() => {
