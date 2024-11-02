@@ -13,13 +13,13 @@ function BeforeShutdown(signal, reason, promise) {
         console.log(`Uncaught exception: ${reason}`);
     }
 
-    try {
-        DataManagerInstance.Dispose();
-    } catch (err){
-        console.log(`Error occured database connection dispose: ${err}`);
-    } finally {
-        process.exit(0);
+    const result = DataManagerInstance.Dispose();
+
+    if (result.error) {
+        console.log(`Error occured database connection dispose: ${result.error}`);
     }
+
+    process.exit(0);
 }
 
 ['SIGINT', 'SIGTERM', 'SIGUSR1', 'SIGUSR2'].forEach(signal => {
