@@ -93,7 +93,8 @@ router.delete('/:id', SessionValidatorMW, (req, res, next) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }
 
-    return res.status(StatusCodes.NO_CONTENT).json(result.data);
+
+    return res.status(StatusCodes.NO_CONTENT).send();
 })
 
 /**
