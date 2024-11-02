@@ -1,5 +1,5 @@
 import { BodyFieldChecker } from '#middleware/FieldCheckerMW';
-import { DataManagerInstance } from '#managers/DataManager';
+import { DataManagerInstance, DatabaseErrorCodes } from '#managers/DataManager';
 import { SessionValidatorMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
 import express from 'express';
@@ -12,7 +12,9 @@ const router = express.Router();
  */
 router.get('/', SessionValidatorMW, (req, res, next) => {
     const result = DataManagerInstance.GetCompanies();
-    res.status(StatusCodes.OK).json(result);
+    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+
+    res.status(StatusCodes.OK).json(result.data);
 })
 
 /**
@@ -21,21 +23,21 @@ router.get('/', SessionValidatorMW, (req, res, next) => {
  * @route POST api/companies
  */
 router.post('/', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'), (req, res, next) => {
-    try {
-        DataManagerInstance.InsertCompany(req.body.fake_name, req.body.real_name, req.body.info);
+    const result = DataManagerInstance.InsertCompany(req.body.fake_name, req.body.real_name, req.body.info);
 
-        return res.status(StatusCodes.CREATED).json({
-            fake_name: req.body.fake_name,
-            real_name: req.body.real_name,
-            info: req.body.info
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
         });
-    } catch (err) {
-        if (err.code !== 'SQLITE_CONSTRAINT_UNIQUE') throw err;
-        
-        return res.status(StatusCodes.CONFLICT).json({
-            error: `Fake Name ${req.body.fake_name} already exists`
-        })
+
+        if (result.error.code === DatabaseErrorCodes.SQLITE_CONSTRAINT_UNIQUE) return res.status(StatusCodes.CONFLICT).json({
+            error: result.error.message
+        });
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }
+
+    return res.status(StatusCodes.CREATED).json(result.data);
 });
 
 /**
@@ -44,15 +46,26 @@ router.post('/', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'),
  * @route GET api/companies/:id
  */
 router.get('/:id', SessionValidatorMW, (req, res, next) => {
-    const result = DataManagerInstance.GetCompany(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "ID must be a number"
+    })
 
-    if (!result) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: `Company with id "${req.params.id}" not found!`
-        });
+    const result = DataManagerInstance.GetCompany(id);
+
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
+        })
+
+        if (result.error.code === DatabaseErrorCodes.COMPANY_NOT_FOUND) return res.status(StatusCodes.NOT_FOUND).json({
+            error: result.error.message
+        })
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }
 
-    return res.status(StatusCodes.OK).json(result);
+    return res.status(StatusCodes.OK).json(result.data);
 })
 
 /**
@@ -61,15 +74,26 @@ router.get('/:id', SessionValidatorMW, (req, res, next) => {
  * @route DELETE api/companies/:id
  */
 router.delete('/:id', SessionValidatorMW, (req, res, next) => {
-    const result = DataManagerInstance.RemoveCompany(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "ID must be a number"
+    })
 
-    if (!result) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: `Company with id ${req.params.id} not found!`
-        });
+    const result = DataManagerInstance.RemoveCompany(id);
+
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
+        })
+
+        if (result.error.code === DatabaseErrorCodes.COMPANY_NOT_FOUND) return res.status(StatusCodes.NOT_FOUND).json({
+            error: result.error.message
+        })
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }
 
-    return res.status(StatusCodes.NO_CONTENT).send();
+    return res.status(StatusCodes.NO_CONTENT).json(result.data);
 })
 
 /**
@@ -78,27 +102,29 @@ router.delete('/:id', SessionValidatorMW, (req, res, next) => {
  * @route PUT api/companies/:id
  */
 router.put('/:id', SessionValidatorMW, BodyFieldChecker('fake_name', 'real_name'), (req, res, next) => {
-    try {
-        const result = DataManagerInstance.UpdateCompany(req.params.id, req.body.fake_name, req.body.real_name, req.body.info);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(StatusCodes.BAD_REQUEST).json({
+        error: "ID must be a number"
+    })
 
-        if (!result) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: `Company with id ${req.params.id} not found!`
-            });
-        }
-    
-        return res.status(StatusCodes.OK).json({
-            id: req.params.id,
-            fake_name: req.body.fake_name,
-            real_name: req.body.real_name,
-            info: req.body.info
-        });
-    } catch (err) {
-        if (err.code !== 'SQLITE_CONSTRAINT_UNIQUE') throw err;
-        
-        return res.status(StatusCodes.CONFLICT).json({
-            error: `Fake Name ${req.body.fake_name} already exists`
+    const result = DataManagerInstance.UpdateCompany(id, req.body.fake_name, req.body.real_name, req.body.info);
+
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
         })
+
+        if (result.error.code === DatabaseErrorCodes.COMPANY_NOT_FOUND) return res.status(StatusCodes.NOT_FOUND).json({
+            error: result.error.message
+        })
+
+        if (result.error.code === DatabaseErrorCodes.SQLITE_CONSTRAINT_UNIQUE) return res.status(StatusCodes.CONFLICT).json({
+            error: result.error.message
+        })
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
     }
+
+    return res.status(StatusCodes.OK).json(result.data);
 })
 export { router }
