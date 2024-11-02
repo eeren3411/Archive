@@ -16,13 +16,13 @@ function LoginRulesMW(req, res, next) {
     const result = DataManagerInstance.GetConfig('checksum');
     if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
 
-    if (!result.data) {
+    if (!result.data.value) {
         return res.status(StatusCodes.NOT_FOUND).json({
             error: "Database does not exist"
         })
     }
 
-    if (result.data !== req.body.checksum) {
+    if (result.data.value !== req.body.checksum) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
             error: "Invalid checksum"
         })

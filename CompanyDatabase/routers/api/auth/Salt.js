@@ -8,7 +8,7 @@ router.get('/salt', (req, res, next) => {
     if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
 
     res.json({
-        salt: result.data || null
+        salt: result.data.value || null
     })
 
     return next();

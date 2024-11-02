@@ -214,7 +214,7 @@ class DataManager {
     /**
      * UNSAFE: GetConfig
      * @param {string} key 
-     * @returns {string}
+     * @returns {{key: string, value: string}}
      * @throws {DatabaseError}
      */
     #GetConfig(key) {
@@ -222,13 +222,16 @@ class DataManager {
             key: key
         });
         if (!result) throw new DatabaseError(`Config variable ${key} does not exist`, DatabaseErrorCodes.CONFIG_NOT_FOUND);
-        return result.value;
+        return {
+            key: key,
+            value: result.value
+        };
     }
 
     /**
      * Returns config value by key
      * @param {string} key key
-     * @returns {{error?: Error, data?: string}} Data: config value
+     * @returns {{error?: Error, data?: {key: string, value: string}} Data: config value
      * @throws {DatabaseError} INPUT_NOT_VALID
      */
     GetConfig(key) {
@@ -367,7 +370,7 @@ class DataManager {
     /**
      * UNSAFE: RemoveCompany
      * @param {number} id 
-     * @returns {number}
+     * @returns {{id: number}}
      * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     #RemoveCompany(id) {
@@ -375,13 +378,15 @@ class DataManager {
             id: id
         });
         if (result.changes === 0) throw new DatabaseError(`Company with id ${id} does not exist`, DatabaseErrorCodes.COMPANY_NOT_FOUND);
-        return id;
+        return {
+            id: id
+        };
     }
 
     /**
      * Removes specified company
      * @param {number} id Company id
-     * @returns {{error?: Error, data?: number}} Data: Deleted company id
+     * @returns {{error?: Error, data?: {id: number}}} Data: Deleted company id
      * @throws {DatabaseError} INPUT_NOT_VALID
      * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
@@ -487,7 +492,7 @@ class DataManager {
     /**
      * UNSAFE: RemoveCompanyBulk
      * @param {[number]} ids 
-     * @returns {[number]}
+     * @returns {{ids: [number]}}
      * @throws {DatabaseError} COMPANY_NOT_FOUND
      */
     #RemoveCompanyBulk(ids) {
@@ -498,13 +503,15 @@ class DataManager {
         });
         
         transaction();
-        return ids;
+        return {
+            ids: ids
+        };
     }
 
     /**
      * Deletes multiple companies from the companies table.
      * @param {[number]} ids - Array of company IDs to delete.
-     * @returns {{error?: Error, data?: [number]}} Data: Deleted company IDs
+     * @returns {{error?: Error, data?: {ids: [number]}}}} Data: Deleted company IDs
      * @throws {DatabaseError} INPUT_NOT_VALID
      * @throws {DatabaseError} COMPANY_NOT_FOUND
      */

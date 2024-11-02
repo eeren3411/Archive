@@ -16,7 +16,7 @@ function CraeteRulesMW(req, res, next) {
     const result = DataManagerInstance.GetConfig('salt');
     if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
 
-    if (result.data) {
+    if (result.data.value) {
         return res.status(StatusCodes.CONFLICT).json({
             error: "Database already exists"
         });
