@@ -4,8 +4,11 @@ import express from 'express';
 const router = express.Router();
 
 router.get('/salt', (req, res, next) => {
+    const result = DataManagerInstance.GetConfig('salt');
+    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+
     res.json({
-        salt: DataManagerInstance.GetConfig('salt') || null
+        salt: result.data || null
     })
 
     return next();

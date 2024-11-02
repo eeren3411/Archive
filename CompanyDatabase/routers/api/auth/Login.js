@@ -5,22 +5,24 @@ import { StatusCodes } from "http-status-codes";
 import express from "express";
 
 /**
- * Checks if the checksum exists and is valid.
- * Returns 422 if the checksum is missing, 404 if the database does not exist, and 401 if the checksum is invalid.
+ * Checks if the checksum is valid.
+ * Returns 404 if the database does not exist, and 401 if the checksum is invalid.
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  * @returns {void}
  */
 function LoginRulesMW(req, res, next) {
-    const checksum = DataManagerInstance.GetConfig('checksum');
-    if (!checksum) {
+    const result = DataManagerInstance.GetConfig('checksum');
+    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+
+    if (!result.data) {
         return res.status(StatusCodes.NOT_FOUND).json({
             error: "Database does not exist"
         })
     }
 
-    if (checksum !== req.body.checksum) {
+    if (result.data !== req.body.checksum) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
             error: "Invalid checksum"
         })
