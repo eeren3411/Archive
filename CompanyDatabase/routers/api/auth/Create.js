@@ -29,8 +29,15 @@ function CraeteRulesMW(req, res, next) {
     return next();
 };
 
-
 const router = express.Router();
+
+/**
+ * Initializes the database with the given salt and checksum.
+ * @method POST
+ * @route POST api/auth/create
+ * @param {{salt: string, checksum: string}} req.body
+ * @returns {{salt: string, checksum: string}}
+ */
 router.post('/create', BodyFieldChecker('salt', 'checksum'), CraeteRulesMW, CreateSessionMW, (req, res, next) => {
     const salt = req.body.salt;
     const checksum = req.body.checksum;

@@ -11,6 +11,14 @@ const router = express.Router();
  * This updates all existing companies in the database.
  * @method POST
  * @route POST api/companies/rotate
+ * 
+ * @param {sessionid: string} req.cookies
+ * @param {[{id: number, fake_name: string, real_name: string}]} req.body
+ * @param {backup?: boolean} req.query
+ * @param {x-salt: string, x-checksum: string} req.headers
+ * 
+ * @returns {StatusCodes.OK | StatusCodes.NOT_FOUND | StatusCodes.BAD_REQUEST | StatusCodes.CONFLICT | StatusCodes.INTERNAL_SERVER_ERROR}
+ * @returns {[{id: number, fake_name: string, real_name: string, info: string}]}
  */
 router.post('/rotate', SessionValidatorMW, BodyArrayFieldChecker('id', 'fake_name', 'real_name'), HeaderFieldChecker('x-salt', 'x-checksum'), (req, res, next) => {
     const backup = req.query?.backup?.toLocaleLowerCase() === 'true' || parseInt(req.query?.backup) > 0;
