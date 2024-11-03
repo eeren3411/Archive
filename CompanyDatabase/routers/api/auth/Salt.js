@@ -1,11 +1,17 @@
-import { DataManagerInstance } from '#managers/DataManager';
+import { DataManagerInstance, DatabaseErrorCodes } from '#managers/DataManager';
 import express from 'express';
 
 const router = express.Router();
 
 router.get('/salt', (req, res, next) => {
     const result = DataManagerInstance.GetConfig('salt');
-    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.CONFIG_NOT_FOUND) return res.json({
+            salt: null
+        })
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    }
 
     res.json({
         salt: result.data.value || null

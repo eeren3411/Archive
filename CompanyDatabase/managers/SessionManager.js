@@ -48,6 +48,18 @@ class SessionManager {
     }
 
     /**
+     * Debounces session
+     * @param {Session} session 
+     */
+    #DebounceSession(session) {
+        if (session.DeleteTimeout) clearTimeout(session.DeleteTimeout);
+
+        session.DeleteTimeout = setTimeout(() => {
+            this.DeleteSession(session.SessionID);
+        }, SESSION_TIMEOUT);
+    }
+
+    /**
      * Creates new session and returns Session ID.
      * @param {import('express').Request} req
      * @returns {string} Session ID
@@ -55,9 +67,7 @@ class SessionManager {
     CreateSession(req) {
         const session = new Session(req.ip, req.headers['user-agent']);
 
-        session.DeleteTimeout = setTimeout(() => {
-            this.DeleteSession(session.SessionID);
-        }, SESSION_TIMEOUT);
+        this.#DebounceSession(session);
 
         this.#ActiveSessions.set(session.SessionID, session);
 
@@ -80,10 +90,7 @@ class SessionManager {
             return false;
         }
 
-        clearTimeout(session.DeleteTimeout);
-        session.DeleteTimeout = setTimeout(() => {
-            this.DeleteSession(session.SessionID);
-        }, SESSION_TIMEOUT);
+        this.#DebounceSession(session);
 
         return true;
     }

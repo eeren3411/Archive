@@ -6,14 +6,30 @@ import fs from 'fs';
 import { ROOT, DATABASE_FILENAME, DATABASE_ARCHIVE_FOLDER } from "#config";
 
 /**
- * Error codes
- * @type {{CONFIG_NOT_FOUND: number, COMPANY_NOT_FOUND: number, INPUT_NOT_VALID: number, SQLITE_CONSTRAINT_UNIQUE: number, DATA_LENGTH_MISMATCH: number}}
+ * Custom error codes used in DataManaer
+ * @enum {number}
  */
 export const DatabaseErrorCodes = {
+    /**
+     * Key not found in config table
+     */
     CONFIG_NOT_FOUND: 0,
+    /**
+     * Company not found with given ID
+     */
     COMPANY_NOT_FOUND: 1,
+    /**
+     * Input is broken
+     */
     INPUT_NOT_VALID: 2,
+    /**
+     * There is already a row with the same unique field
+     */
     SQLITE_CONSTRAINT_UNIQUE: 3,
+    /**
+     * Data length does not match current row count.
+     * Fired at RotateDatabase only
+     */
     DATA_LENGTH_MISMATCH: 4
 }
 
@@ -224,7 +240,7 @@ class DataManager {
      * UNSAFE: GetConfig
      * @param {string} key 
      * @returns {{key: string, value: string}}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} CONFIG_NOT_FOUND
      */
     #GetConfig(key) {
         const result = this.#getConfig.get({
@@ -240,8 +256,9 @@ class DataManager {
     /**
      * Returns config value by key
      * @param {string} key key
-     * @returns {{error?: Error, data?: {key: string, value: string}} Data: config value
+     * @returns {{error?: Error, data?: {key: string, value: string}}} Data: config value
      * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} CONFIG_NOT_FOUND
      */
     GetConfig(key) {
         return this.#SafeExecution(() => {

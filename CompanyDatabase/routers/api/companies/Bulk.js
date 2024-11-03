@@ -5,6 +5,20 @@ import { StatusCodes } from 'http-status-codes';
 import express from 'express';
 
 const router = express.Router();
+
+/**
+ * Gets all companies
+ * @method GET
+ * @route GET api/companies/bulk
+ */
+router.get('/bulk', SessionValidatorMW, (req, res, next) => {
+    const result = DataManagerInstance.GetCompanies();
+
+    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+
+    return res.status(StatusCodes.OK).json(result.data);
+})
+
 /**
  * Inserts multiple companies at once
  * @method POST
