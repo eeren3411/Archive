@@ -240,7 +240,7 @@ class DataManager {
      * UNSAFE: GetConfig
      * @param {string} key 
      * @returns {{key: string, value: string}}
-     * @throws {DatabaseError}
+     * @throws {DatabaseError} CONFIG_NOT_FOUND
      */
     #GetConfig(key) {
         const result = this.#getConfig.get({
@@ -256,8 +256,9 @@ class DataManager {
     /**
      * Returns config value by key
      * @param {string} key key
-     * @returns {{error?: Error, data?: {key: string, value: string}} Data: config value
+     * @returns {{error?: Error, data?: {key: string, value: string}}} Data: config value
      * @throws {DatabaseError} INPUT_NOT_VALID
+     * @throws {DatabaseError} CONFIG_NOT_FOUND
      */
     GetConfig(key) {
         return this.#SafeExecution(() => {
