@@ -10,7 +10,7 @@ const router = express.Router();
  * @method GET
  * @route GET api/companies
  */
-router.get('/', SessionValidatorMW, (req, res, next) => {
+router.get('/', SessionValidatorMW, QueryFieldChecker('id'), (req, res, next) => {
     const result = DataManagerInstance.GetCompany(parseInt(req.query?.id));
 
     if (result.error) {
