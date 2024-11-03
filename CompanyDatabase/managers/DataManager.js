@@ -269,7 +269,7 @@ class DataManager {
      */
     GetConfig(key) {
         return this.#SafeExecution(() => {
-            if (typeof key !== "string", key.trim() === "") throw new DatabaseError("Invalid type for key at GetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof key !== "string" || key.trim() === "") throw new DatabaseError("Invalid type for key at GetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
     
             return this.#GetConfig(key);
         })
@@ -302,8 +302,8 @@ class DataManager {
      */
     SetConfig(key, value) {
         return this.#SafeExecution(() => {
-            if (typeof key !== "string", key.trim() === "") throw new DatabaseError("Invalid type for key at SetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
-            if (typeof value !== "string", value.trim() === "") throw new DatabaseError("Invalid type for value at SetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof key !== "string" || key.trim() === "") throw new DatabaseError("Invalid type for key at SetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof value !== "string" || value.trim() === "") throw new DatabaseError("Invalid type for value at SetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
     
             return this.#SetConfig(key, value);
         })
@@ -447,8 +447,8 @@ class DataManager {
      */
     InsertCompany(fake_name, real_name, info = null) {
         return this.#SafeExecution(() => {
-            if (typeof fake_name !== "string", fake_name.trim() === "") throw new DatabaseError("Invalid type for fake_name at InsertCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
-            if (typeof real_name !== "string", real_name.trim() === "") throw new DatabaseError("Invalid type for real_name at InsertCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof fake_name !== "string" || fake_name.trim() === "") throw new DatabaseError("Invalid type for fake_name at InsertCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof real_name !== "string" || real_name.trim() === "") throw new DatabaseError("Invalid type for real_name at InsertCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
     
             return this.#InsertCompany(fake_name, real_name, info);
         })
@@ -530,8 +530,8 @@ class DataManager {
     UpdateCompany(id, fake_name, real_name, info = null) {
         return this.#SafeExecution(() => {
             if (typeof id !== "number") throw new DatabaseError("Invalid type for id at UpdateCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
-            if (typeof fake_name !== "string", fake_name.trim() === "") throw new DatabaseError("Invalid type for fake_name at UpdateCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
-            if (typeof real_name !== "string", real_name.trim() === "") throw new DatabaseError("Invalid type for real_name at UpdateCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof fake_name !== "string" || fake_name.trim() === "") throw new DatabaseError("Invalid type for fake_name at UpdateCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof real_name !== "string" || real_name.trim() === "") throw new DatabaseError("Invalid type for real_name at UpdateCompany", DatabaseErrorCodes.INPUT_NOT_VALID);
             
             return this.#UpdateCompany(id, fake_name, real_name, info);
         })
@@ -569,7 +569,8 @@ class DataManager {
             if (!Array.isArray(companies)) throw new DatabaseError("companies must be an array at InsertCompanyBulk", DatabaseErrorCodes.INPUT_NOT_VALID);
             if (companies.some(company => 
                 company === null || typeof company !== "object" ||
-                typeof company.fake_name !== "string" || typeof company.real_name !== "string"
+                typeof company.fake_name !== "string" || company.fake_name.trim() !== "" || 
+                typeof company.real_name !== "string" || company.real_name.trim() !== ""
             )) throw new DatabaseError("Invalid type for company at InsertCompanyBulk", DatabaseErrorCodes.INPUT_NOT_VALID);
 
             return this.#InsertCompanyBulk(companies);
@@ -641,7 +642,9 @@ class DataManager {
             if (!Array.isArray(companies)) throw new DatabaseError("companies must be an array at UpdateCompanyBulk", DatabaseErrorCodes.INPUT_NOT_VALID);
             if (companies.some(company => 
                 company === null || typeof company !== "object" ||
-                typeof company.id !== "number" || typeof company.fake_name !== "string" || typeof company.real_name !== "string"
+                typeof company.id !== "number" || 
+                typeof company.fake_name !== "string" || company.fake_name.trim() !== "" ||
+                typeof company.real_name !== "string" || company.real_name.trim() !== ""
             )) throw new DatabaseError("Invalid type for company at UpdateCompanyBulk", DatabaseErrorCodes.INPUT_NOT_VALID);
 
             return this.#UpdateCompanyBulk(companies);
@@ -697,8 +700,8 @@ class DataManager {
      */
     RotateDatabase(salt, checksum, data, backup = false) {
         return this.#SafeExecution(() => {
-            if (typeof salt !== "string", salt.trim() === "") throw new DatabaseError("Invalid type for salt at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
-            if (typeof checksum !== "string", checksum.trim() === "") throw new DatabaseError("Invalid type for checksum at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof salt !== "string" || salt.trim() === "") throw new DatabaseError("Invalid type for salt at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof checksum !== "string" || checksum.trim() === "") throw new DatabaseError("Invalid type for checksum at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
             if (!Array.isArray(data)) throw new DatabaseError("data must be an array at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
             if (data.some(company => 
                 company === null || typeof company !== "object" ||
