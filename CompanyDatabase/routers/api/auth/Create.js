@@ -1,5 +1,5 @@
 import { BodyFieldChecker } from '#middleware/FieldCheckerMW';
-import { DataManagerInstance } from '#managers/DataManager';
+import { DataManagerInstance, DatabaseErrorCodes } from '#managers/DataManager';
 import { CreateSessionMW } from '#middleware/SessionMW';
 import { StatusCodes } from 'http-status-codes';
 import express from 'express';
@@ -14,7 +14,11 @@ import express from 'express';
  */
 function CraeteRulesMW(req, res, next) {
     const result = DataManagerInstance.GetConfig('salt');
-    if (result.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.CONFIG_NOT_FOUND) return next(); // Continue if configs doesnt exists
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(); // Any other error should return an internal server error
+    }
 
     if (result.data.value) {
         return res.status(StatusCodes.CONFLICT).json({
