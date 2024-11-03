@@ -6,14 +6,30 @@ import fs from 'fs';
 import { ROOT, DATABASE_FILENAME, DATABASE_ARCHIVE_FOLDER } from "#config";
 
 /**
- * Error codes
- * @type {{CONFIG_NOT_FOUND: number, COMPANY_NOT_FOUND: number, INPUT_NOT_VALID: number, SQLITE_CONSTRAINT_UNIQUE: number, DATA_LENGTH_MISMATCH: number}}
+ * Custom error codes used in DataManaer
+ * @enum {number}
  */
 export const DatabaseErrorCodes = {
+    /**
+     * Key not found in config table
+     */
     CONFIG_NOT_FOUND: 0,
+    /**
+     * Company not found with given ID
+     */
     COMPANY_NOT_FOUND: 1,
+    /**
+     * Input is broken
+     */
     INPUT_NOT_VALID: 2,
+    /**
+     * There is already a row with the same unique field
+     */
     SQLITE_CONSTRAINT_UNIQUE: 3,
+    /**
+     * Data length does not match current row count.
+     * Fired at RotateDatabase only
+     */
     DATA_LENGTH_MISMATCH: 4
 }
 
