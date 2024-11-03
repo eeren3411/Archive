@@ -115,3 +115,10 @@ export const BodyArrayFieldChecker = (...fields) => GeneralizedRequestParser('bo
  * @returns {(req: import('express').Request, res: import('express').Response, next: import('express').NextFunction) => void}
  */
 export const HeaderFieldChecker = (...fields) => GeneralizedRequestParser('headers', ObjectFieldChecker(fields));
+
+/**
+ * Creates a middleware that checks if the given fields exist in the query of the request.
+ * @param  {...string} fields 
+ * @returns {(req: import('express').Request, res: import('express').Response, next: import('express').NextFunction) => void}
+ */
+export const QueryFieldChecker = (...fields) => GeneralizedRequestParser('query', ObjectFieldChecker(fields));
