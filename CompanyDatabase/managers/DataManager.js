@@ -310,6 +310,42 @@ class DataManager {
     }
 
     /**
+     * UNSAFE: CreateConfigs
+     * @param {string} salt 
+     * @param {string} checksum 
+     * @returns {{salt: string, checksum: string}}
+     */
+    #CreateConfigs(salt, checksum) {
+        const transaction = this.#db.transaction(() => {
+            this.#SetConfig('salt', salt);
+            this.#SetConfig('checksum', checksum);
+        });
+
+        transaction();
+
+        return {
+            salt: salt,
+            checksum: checksum
+        };
+    }
+
+    /**
+     * Initializes the database with the given salt and checksum.
+     * @param {string} salt 
+     * @param {string} checksum 
+     * @returns {{error?: Error, data?: {salt: string, checksum: string}}}
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     */
+    CreateConfigs(salt, checksum) {
+        return this.#SafeExecution(() => {
+            if (typeof salt !== "string" || salt.trim() === "") throw new DatabaseError("Invalid type for salt at CreateConfigs", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof checksum !== "string" || checksum.trim() === "") throw new DatabaseError("Invalid type for checksum at CreateConfigs", DatabaseErrorCodes.INPUT_NOT_VALID);
+
+            return this.#CreateConfigs(salt, checksum);
+        })
+    }
+
+    /**
      * #UNSAFE: GetCompanyCount
      * @returns {{count: number}}
      */
