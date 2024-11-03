@@ -7,13 +7,14 @@ import { ROOT, DATABASE_FILENAME, DATABASE_ARCHIVE_FOLDER } from "#config";
 
 /**
  * Error codes
- * @type {{CONFIG_NOT_FOUND: number, COMPANY_NOT_FOUND: number, INPUT_NOT_VALID: number, SQLITE_CONSTRAINT_UNIQUE: number}}
+ * @type {{CONFIG_NOT_FOUND: number, COMPANY_NOT_FOUND: number, INPUT_NOT_VALID: number, SQLITE_CONSTRAINT_UNIQUE: number, DATA_LENGTH_MISMATCH: number}}
  */
 export const DatabaseErrorCodes = {
     CONFIG_NOT_FOUND: 0,
     COMPANY_NOT_FOUND: 1,
     INPUT_NOT_VALID: 2,
-    SQLITE_CONSTRAINT_UNIQUE: 3
+    SQLITE_CONSTRAINT_UNIQUE: 3,
+    DATA_LENGTH_MISMATCH: 4
 }
 
 class DatabaseError extends Error {
@@ -181,6 +182,12 @@ class DataManager {
     #updateCompany
 
     /**
+     * Get company count
+     * @type {Database.Statement<[], {count: number}>}
+     */
+    #getCompanyCount
+
+    /**
      * This function prepares database statements for quick execution in the future.
      */
     #prepareMethods() {
@@ -195,6 +202,8 @@ class DataManager {
         this.#removeCompany = this.#db.prepare('DELETE FROM companies WHERE id = @id');
 
         this.#updateCompany = this.#db.prepare('UPDATE companies SET fake_name = @fake_name, real_name = @real_name, info = @info WHERE id = @id');
+
+        this.#getCompanyCount = this.#db.prepare('SELECT COUNT(*) as count FROM companies');
     }
 
     /**
@@ -273,6 +282,24 @@ class DataManager {
             if (typeof value !== "string", value.trim() === "") throw new DatabaseError("Invalid type for value at SetConfig", DatabaseErrorCodes.INPUT_NOT_VALID);
     
             return this.#SetConfig(key, value);
+        })
+    }
+
+    /**
+     * #UNSAFE: GetCompanyCount
+     * @returns {{count: number}}
+     */
+    #GetCompanyCount() {
+        return this.#getCompanyCount.get();
+    }
+
+    /**
+     * Returns the total count of companies in the database.
+     * @returns {{error?: Error, data?: {count: number}}} Data: count of companies
+     */
+    GetComapnyCount() {
+        return this.#SafeExecution(() => {
+            return this.#GetCompanyCount();
         })
     }
 
@@ -558,6 +585,75 @@ class DataManager {
             )) throw new DatabaseError("Invalid type for company at UpdateCompanyBulk", DatabaseErrorCodes.INPUT_NOT_VALID);
 
             return this.#UpdateCompanyBulk(companies);
+        });
+    }
+
+    /**
+     * UNSAFE: RotateDatabase
+     * @param {string} salt 
+     * @param {string} checksum 
+     * @param {[{id: number, fake_name: string, real_name: string, info?: string}]} data 
+     * @param {boolean} backup 
+     * @returns {{salt: string, checksum: string, updated: number, timestamp?: number}}
+     * @throws {DatabaseError} DATA_LENGTH_MISMATCH
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
+     */
+    #RotateDatabase(salt, checksum, data, backup = false) {
+        const companyCount = this.#GetCompanyCount().count;
+        if (companyCount !== data.length) throw new DatabaseError("Invalid company count at RotateDatabase", DatabaseErrorCodes.DATA_LENGTH_MISMATCH);
+
+        const timestamp = Date.now();
+
+        if (backup) {
+            const archivePath = path.join(DATABASE_ARCHIVE_FOLDER, `${timestamp}-${DATABASE_FILENAME}`);
+            !fs.existsSync(DATABASE_ARCHIVE_FOLDER) && fs.mkdirSync(DATABASE_ARCHIVE_FOLDER);
+            fs.copyFileSync(this.#dbFilePath, archivePath);
+            console.log(`Before Database Rotation a backup created at: ${archivePath}`);
+        }
+
+        const transaction = this.#db.transaction(() => {
+            this.#UpdateCompanyBulk(data);
+
+            this.#SetConfig('salt', salt);
+            this.#SetConfig('checksum', checksum);
+        });
+        
+        transaction();
+
+        return {
+            salt: salt,
+            checksum: checksum,
+            backup: backup,
+            updated: companyCount,
+            timestamp: timestamp
+        };
+    }
+
+    /**
+     * Rotate the database with new salt and checksum.
+     * This updates all existing companies in the database.
+     * @param {string} salt New salt
+     * @param {string} checksum New checksum
+     * @param {[{id: number, fake_name: string, real_name: string, info?: string}]} data Array of companies to insert
+     * @param {boolean} backup Whether to create a backup of the database
+     * @returns {{error?: Error, data?: {salt: string, checksum: string, updated: number, timestamp?: number}}}
+     * @throws {DatabaseError} DATA_LENGTH_MISMATCH
+     * @throws {DatabaseError} COMPANY_NOT_FOUND
+     * @throws {DatabaseError} SQLITE_CONSTRAINT_UNIQUE
+     * @throws {DatabaseError} INPUT_NOT_VALID
+     */
+    RotateDatabase(salt, checksum, data, backup = false) {
+        return this.#SafeExecution(() => {
+            if (typeof salt !== "string", salt.trim() === "") throw new DatabaseError("Invalid type for salt at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (typeof checksum !== "string", checksum.trim() === "") throw new DatabaseError("Invalid type for checksum at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (!Array.isArray(data)) throw new DatabaseError("data must be an array at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+            if (data.some(company => 
+                company === null || typeof company !== "object" ||
+                typeof company.id !== "number" || typeof company.fake_name !== "string" || typeof company.real_name !== "string"
+            )) throw new DatabaseError("Invalid type for company at RotateDatabase", DatabaseErrorCodes.INPUT_NOT_VALID);
+
+            return this.#RotateDatabase(salt, checksum, data, backup);
         });
     }
 
