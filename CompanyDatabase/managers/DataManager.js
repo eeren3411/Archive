@@ -78,6 +78,14 @@ class DataManager {
         if (!this.#isDatabaseCreated && !this.#validateDatabase()) {
             console.error("Database corrupted. Moving old database to archive folder.");
             this.#archiveDatabase();
+            
+            // Remove old database file
+            this.#db.close();
+            fs.rmSync(this.#dbFilePath);
+
+            // Create new database
+            this.#db = new Database(this.#dbFilePath);
+            this.#isDatabaseCreated = true;
         }
 
         if (this.#isDatabaseCreated) {
@@ -118,22 +126,21 @@ class DataManager {
     }
 
     /**
-     * Archives database and creates a new one
+     * Archives database
+     * @returns {string} Name of the archived database file
      */
     #archiveDatabase() {
-        // Create archive folder if it doesnt exists
-        !fs.existsSync(DATABASE_ARCHIVE_FOLDER) && fs.mkdirSync(DATABASE_ARCHIVE_FOLDER, {recursive: true});
+        // Make sure archive folder exists
+        fs.mkdirSync(DATABASE_ARCHIVE_FOLDER, {recursive: true});
 
-        // Move database file
-        this.#db.close();
+        // Copy database file
         const archiveName = `${Date.now()}-${DATABASE_FILENAME}`;
-        fs.renameSync(this.#dbFilePath, path.join(DATABASE_ARCHIVE_FOLDER, archiveName));
+        const archivePath = path.join(DATABASE_ARCHIVE_FOLDER, archiveName);
+        fs.copyFileSync(this.#dbFilePath, archivePath);
 
-        console.error(`Archived database: ${archiveName}`);
+        console.log(`Archived database at: ${archivePath}`);
 
-        // Re-create empty database.
-        this.#db = new Database(this.#dbFilePath);
-        this.#isDatabaseCreated = true;
+        return archiveName;
     }
 
     /**
@@ -620,14 +627,7 @@ class DataManager {
         const companyCount = this.#GetCompanyCount().count;
         if (companyCount !== data.length) throw new DatabaseError("Invalid company count at RotateDatabase", DatabaseErrorCodes.DATA_LENGTH_MISMATCH);
 
-        const timestamp = Date.now();
-
-        if (backup) {
-            const archivePath = path.join(DATABASE_ARCHIVE_FOLDER, `${timestamp}-${DATABASE_FILENAME}`);
-            !fs.existsSync(DATABASE_ARCHIVE_FOLDER) && fs.mkdirSync(DATABASE_ARCHIVE_FOLDER);
-            fs.copyFileSync(this.#dbFilePath, archivePath);
-            console.log(`Before Database Rotation a backup created at: ${archivePath}`);
-        }
+        const backupFile = backup && this.#archiveDatabase();
 
         const transaction = this.#db.transaction(() => {
             this.#UpdateCompanyBulk(data);
@@ -641,9 +641,8 @@ class DataManager {
         return {
             salt: salt,
             checksum: checksum,
-            backup: backup,
-            updated: companyCount,
-            timestamp: timestamp
+            backup: backupFile,
+            updated: companyCount
         };
     }
 
