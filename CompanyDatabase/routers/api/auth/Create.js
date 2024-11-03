@@ -29,20 +29,30 @@ function CraeteRulesMW(req, res, next) {
     return next();
 };
 
-
 const router = express.Router();
+
+/**
+ * Initializes the database with the given salt and checksum.
+ * @method POST
+ * @route POST api/auth/create
+ * @param {{salt: string, checksum: string}} req.body
+ * @returns {{salt: string, checksum: string}}
+ */
 router.post('/create', BodyFieldChecker('salt', 'checksum'), CraeteRulesMW, CreateSessionMW, (req, res, next) => {
-    const salt = req.body.salt.toString();
-    const checksum = req.body.checksum.toString();
+    const salt = req.body.salt;
+    const checksum = req.body.checksum;
 
-    const saltResult = DataManagerInstance.SetConfig('salt', salt);
-    const checksumResult = DataManagerInstance.SetConfig('checksum', checksum);
-    if (saltResult.error || checksumResult.error) return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    const result = DataManagerInstance.CreateConfigs(salt, checksum);
 
-    return res.status(StatusCodes.CREATED).json({
-        salt: salt,
-        checksum: checksum
-    });
+    if (result.error) {
+        if (result.error.code === DatabaseErrorCodes.INPUT_NOT_VALID) return res.status(StatusCodes.BAD_REQUEST).json({
+            error: result.error.message
+        });
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+    }
+
+    return res.status(StatusCodes.CREATED).json(result.data);
 });
 
 export { router }

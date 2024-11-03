@@ -38,6 +38,14 @@ function LoginRulesMW(req, res, next) {
 }
 
 const router = express.Router();
+
+/**
+ * Checks user given checksum and initializes a session
+ * @method POST
+ * @route POST api/auth/login
+ * @param {{checksum: string}} req.body
+ * @returns {{checksum: string}}
+ */
 router.post('/login', BodyFieldChecker('checksum'), LoginRulesMW, CreateSessionMW, (req, res, next) => {
     return res.status(StatusCodes.OK).json({
         checksum: req.body.checksum
