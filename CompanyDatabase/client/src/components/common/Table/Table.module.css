@@ -62,13 +62,31 @@
 		tbody tr {
 			will-change: transform;
 
-			td {
-				padding: 12px 15px;
-			}
-		
 			&:hover {
 				transform: scale(1.02);
 				transition: all 0.2s ease;
+			}
+
+			td {
+				padding: 12px 15px;
+
+				.OneLinerColumn {
+					display: -webkit-box;
+					-webkit-box-orient: vertical;
+					overflow: hidden;
+					-webkit-line-clamp: 1;
+					line-clamp: 1;
+					width: auto;
+				}
+
+				.MultiLinerColumn {
+					display: -webkit-box;
+					-webkit-box-orient: vertical;
+					overflow: hidden;
+					-webkit-line-clamp: 3;
+					line-clamp: 3;
+					width: 1fr;
+				}
 			}
 		}
 	}
@@ -78,20 +96,4 @@
 		justify-content: center;
 		align-items: center;
 	}
-}
-
-.OneLinerWrapper {
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	-webkit-line-clamp: 1;
-	line-clamp: 1;
-}
-
-.ThreeLinerWrapper {
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	-webkit-line-clamp: 3;
-	line-clamp: 3;
 }
