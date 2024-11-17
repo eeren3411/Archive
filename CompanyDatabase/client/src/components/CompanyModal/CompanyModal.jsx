@@ -23,7 +23,7 @@ const CompanyModal = ({
         <ModalBase className={`${ModalContainer} ${className || ""}`} onClose={onClose}>
             <div className={ModalHeader}>
                 <h2>Details</h2>
-                <button className={ModalCloseButton} onClick={onClose}>X</button>
+                <button className={`modal-close-button ${ModalCloseButton}`} onClick={onClose}>X</button>
             </div>
             <form onSubmit={handleSubmit}>
                 <div className={ModalBody}>
@@ -37,8 +37,8 @@ const CompanyModal = ({
                     <textarea name="info" defaultValue={data.info || ""}/>
 
                     <div className={ModalButtonContainer}>
-                        <button className={ModalButton} type="button" onClick={onClose}>Cancel</button>
-                        <button className={ModalButton} type="submit">Save</button>
+                        <button className={`modal-cancel-button ${ModalButton}`} type="button" onClick={onClose}>Cancel</button>
+                        <button className={`modal-submit-button ${ModalButton}`} type="submit">Save</button>
                     </div>
                 </div>
             </form>

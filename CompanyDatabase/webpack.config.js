@@ -4,7 +4,6 @@ import TerserPlugin from 'terser-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
 import { ROOT } from '#config';
 
 const clientPath = path.join(ROOT, 'client');
@@ -36,7 +35,6 @@ export default (env, argv) => {
               },
               {
                   test: /\.css$/,
-                  exclude: /colors/,
                   use: [
                       MiniCssExtractPlugin.loader, // Extract CSS into separate files (use style-loader to load styles into javascript)
                       'css-loader', // Translates CSS into CommonJS
@@ -52,11 +50,6 @@ export default (env, argv) => {
           }),
           new MiniCssExtractPlugin({ // Minicss settings
               filename: 'style/cssbundle-[contenthash].css',
-          }),
-          new CopyPlugin({ // Do not minify the colors
-            patterns: [
-              {from: path.join(clientPath, "colors"), to:path.join(distPath, "colors")}
-            ]
           })
       ],
       optimization: {
