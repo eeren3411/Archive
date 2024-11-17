@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Table from "./components/Table/Table.jsx";
-import CompanyModal from "./components/CompanyModal.jsx";
+import { Table } from "./components/common";
+import { CompanyModal } from "./components/CompanyModal";
 import { faker } from "@faker-js/faker";
 
 const App = () => {
