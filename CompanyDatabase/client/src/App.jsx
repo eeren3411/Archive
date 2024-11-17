@@ -56,9 +56,7 @@ const App = () => {
   console.log("App rerendered");
   return (
     <div className="container">
-      <div className="main-rectangle">
-        <Table columns={columns} data={data} uniqueKey={"id"} key={"table"} onEdit={onEdit} onDelete={onDelete} defaultSortSettings={{key: "id", direction: true}} className={"customtable"} pageSize={5}/>
-      </div>
+      <Table columns={columns} data={data} uniqueKey={"id"} key={"table"} onEdit={onEdit} onDelete={null} defaultSortSettings={{key: "id", direction: true}} className={"custom-table"} pageSize={5}/>
       <button className="edit-button" onClick={updateCompany}>Update Company</button>
 
       <button onClick={() => setCompanyModalData(true)}>Open Modal</button>
@@ -68,3 +66,4 @@ const App = () => {
 };
 
 export default App;
+

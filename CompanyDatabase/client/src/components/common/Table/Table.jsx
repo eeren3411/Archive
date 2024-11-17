@@ -120,17 +120,15 @@ const Table = ({
                     <tr>
                         {columns.map((column) => (
                             <th
-                                className={`${sortSettings.key === column.key ? (sortSettings.direction ? asc : desc) : ''} ${column.sortable ? Sortable : ''}`}
+                                className={`${column.sortable ? "sortable " + Sortable : ''} ${sortSettings.key === column.key ? (sortSettings.direction ? asc : desc) : ''}`}
                                 key={column.key}
                                 onClick={handleSort.bind(this, column)}
                             >
-                                <span>
-                                    {column.label}
-                                </span>
+                                {column.label}
                             </th>
                         ))}
-                        {isOnEditFunction && <th><span>{editTitle || "Edit"}</span></th>}
-                        {isOnDeleteFunction && <th><span>{deleteTitle || "Delete"}</span></th>}
+                        {isOnEditFunction && <th>{editTitle || "Edit"}</th>}
+                        {isOnDeleteFunction && <th>{deleteTitle || "Delete"}</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -146,9 +144,9 @@ const Table = ({
                     ))}
                 </tbody>
             </table>
-            <div style={{display: pageCount === 1 ? "none" : "block"}} className={Controller}>
-                <button style={{ visibility: page === 0 ? "hidden" : "visible" }} onClick={() => setPage(0)}><span>&lt;&lt;</span></button>
-                <button style={{ visibility: page === 0 ? "hidden" : "visible" }} onClick={() => setPage(page - 1)}><span>&lt;</span></button>
+            <div className={`footer ${Controller}`} style={{display: pageCount === 1 ? "none" : "block"}}>
+                <button style={{ visibility: page === 0 ? "hidden" : "visible" }} onClick={() => setPage(0)}>&lt;&lt;</button>
+                <button style={{ visibility: page === 0 ? "hidden" : "visible" }} onClick={() => setPage(page - 1)}>&lt;</button>
                 <select value={page} onChange={(e) => setPage(parseInt(e.target.value))}>
                     {
                         Array.from({ length: pageCount }, (_, index) => (
@@ -161,8 +159,8 @@ const Table = ({
                         ))
                     }
                 </select>
-                <button style={{ visibility: page === pageCount - 1 ? "hidden" : "visible" }} onClick={() => setPage(page + 1)}><span>&gt;</span></button>
-                <button style={{ visibility: page === pageCount - 1 ? "hidden" : "visible" }} onClick={() => setPage(pageCount - 1)}><span>&gt;&gt;</span></button>
+                <button style={{ visibility: page === pageCount - 1 ? "hidden" : "visible" }} onClick={() => setPage(page + 1)}>&gt;</button>
+                <button style={{ visibility: page === pageCount - 1 ? "hidden" : "visible" }} onClick={() => setPage(pageCount - 1)}>&gt;&gt;</button>
             </div>
         </div>
     )
