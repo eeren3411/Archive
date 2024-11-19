@@ -1,0 +1,31 @@
+.AlertContainer {
+	position: fixed;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 400px;
+	max-width: 90vw;
+}
+
+.Alert {
+	padding: 10px 20px;
+	margin-bottom: 5px;
+	border-radius: 15px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: flex;
+	justify-content: space-between;
+
+	button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		color: inherit;
+	}
+}
+
+.Alert.FadeOut {
+	opacity: 0;
+	transition: opacity 1s ease;
+}
