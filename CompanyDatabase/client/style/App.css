@@ -26,6 +26,9 @@
 	
 	--natural-button-color: #95a5a6;
 	--natural-button-hover: #7f8c8d;
+
+	--info-button-color: #3498db;
+	--info-button-hover: #2980b9;
 }
 
 :root.light {
@@ -138,6 +141,55 @@ body {
 
 		&:hover {
 			background-color: var(--success-button-hover);
+		}
+	}
+}
+
+.alert-container {
+	color: var(--text-color);
+	z-index: 10000;
+
+	.alert>button:hover {
+		color: var(--text-color-hover);
+	}
+
+	.success {
+		background-color: var(--success-button-color);
+
+		&:hover {
+			background-color: var(--success-button-hover);
+		}
+	}
+
+	.info {
+		background-color: var(--info-button-color);
+
+		&:hover {
+			background-color: var(--info-button-hover);
+		}
+	}
+
+	.natural {
+		background-color: var(--natural-button-color);
+
+		&:hover {
+			background-color: var(--natural-button-hover);
+		}
+	}
+
+	.warning {
+		background-color: var(--warning-button-color);
+
+		&:hover {
+			background-color: var(--warning-button-hover);
+		}
+	}
+
+	.error {
+		background-color: var(--error-button-color);
+
+		&:hover {
+			background-color: var(--error-button-hover);
 		}
 	}
 }
