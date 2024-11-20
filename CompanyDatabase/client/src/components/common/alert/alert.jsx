@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useRef, useState, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import {AlertContainer, Alert, FadeOut} from './alert.module.css';
 
 const AlertComponent = ({
@@ -77,7 +77,7 @@ const AlertProvider = ({
 		setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== id));
 	}
 
-	const createAlert = useMemo(() => (message, type = 0) => {
+	const createAlert = useCallback((message, type = 0) => {
 		setAlerts(prevAlerts => {
 			const id = Date.now();
 
@@ -91,8 +91,12 @@ const AlertProvider = ({
 		});
 	}, [timeOut]);
 
+	const contextObj = useMemo(() => ({
+		createAlert
+	}), [createAlert]);
+
 	return (
-		<AlertContext.Provider value={{createAlert}}>
+		<AlertContext.Provider value={contextObj}>
 			<div className={`${AlertContainer} ${className || ""}`}>
 				{alerts.map(alert => alert.component)}
 			</div>
