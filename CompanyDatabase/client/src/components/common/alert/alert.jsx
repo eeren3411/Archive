@@ -50,7 +50,7 @@ const AlertComponent = ({
 
 	useEffect(() => {
 		onMouseLeave();
-	})
+	}, []);
 
 	return (
 		<div className={`alert ${className} ${Alert} ${fadingOut ? FadeOut : ""}`} style={{transitionDuration: fadeOutDuration}} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
