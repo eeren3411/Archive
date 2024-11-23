@@ -1,8 +1,9 @@
 import React, { useState, useEffect, memo } from "react";
-import { Table } from "./components/common";
-import { CompanyModal } from "./components/CompanyModal";
 import { faker } from "@faker-js/faker";
-import { useAlert } from "./components/common";
+
+import { Table } from "~/components/common";
+import { useAlert } from "~/components/common";
+import { CompanyModal } from "~/components/CompanyModal";
 
 const Main = memo(() => {
 	const [companyModalData, setCompanyModalData] = useState(null);

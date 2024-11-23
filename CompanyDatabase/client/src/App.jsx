@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { AlertProvider } from "./components/common";
+import { AlertProvider } from "~/components/common";
 import Main from "./Main.jsx";
 
 const App = () => {

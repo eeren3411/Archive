@@ -58,6 +58,12 @@ export default (env, argv) => {
 				new TerserPlugin(), // Javascript minimizer
 				new CssMinimizerPlugin(), // CSS minimizer
 			]
-		}
+		},
+		resolve: {
+			alias: {
+				'~': path.resolve(clientPath, 'src'),
+			},
+			extensions: ['.js', '.jsx', '.css']
+		  }
 	};
 };
