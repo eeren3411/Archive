@@ -5,6 +5,8 @@ import { Table } from "~/components/common";
 import { useAlert } from "~/components/common";
 import { CompanyModal } from "~/components/CompanyModal";
 
+import { getCurrentSalt } from "~/api";
+
 const Main = memo(() => {
 	const [companyModalData, setCompanyModalData] = useState(null);
 
@@ -57,7 +59,9 @@ const Main = memo(() => {
 
 	const { createAlert } = useAlert()
 
-	console.log("App rerendered");
+	getCurrentSalt().then(res => {
+		console.log(res);
+	})
 	return (
 		<div className="container">
 			<Table columns={columns} data={data} uniqueKey={"id"} key={"table"} onEdit={onEdit} onDelete={null} defaultSortSettings={{key: "id", direction: true}} className={"custom-table"} pageSize={5}/>
