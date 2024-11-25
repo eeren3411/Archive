@@ -5,6 +5,7 @@
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
 	border-radius: 15px;
 	padding: 20px;
+	animation: ModalOpen 0.3s ease;
 }
 
 .ModalHeader {
@@ -59,4 +60,15 @@
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;
+}
+
+@keyframes ModalOpen {
+	from {
+		transform: translateY(20px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
