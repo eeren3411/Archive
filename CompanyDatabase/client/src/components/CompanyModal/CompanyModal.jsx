@@ -1,16 +1,15 @@
 import React from "react";
 import { faker } from "@faker-js/faker";
 
-import { ModalBase } from "~/components/common";
-
 import { ModalContainer, ModalHeader, ModalCloseButton, ModalBody, ModalButtonContainer, ModalButton } from "./CompanyModal.module.css";
 
 const CompanyModal = ({
-	data,
-	className,
+	data = {},
+	className = "",
 	onClose,
 	onSubmit
 }) => {
+	console.log("company modal render");
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		
@@ -21,7 +20,7 @@ const CompanyModal = ({
 	}
 
 	return (
-		<ModalBase className={`${ModalContainer} ${className || ""}`} onClose={onClose}>
+		<div className={`${ModalContainer} ${className}`}>
 			<div className={ModalHeader}>
 				<h2>Details</h2>
 				<button className={`modal-close-button ${ModalCloseButton}`} onClick={onClose}>X</button>
@@ -43,7 +42,7 @@ const CompanyModal = ({
 					</div>
 				</div>
 			</form>
-		</ModalBase>
+		</div>
 	)
 }
 
