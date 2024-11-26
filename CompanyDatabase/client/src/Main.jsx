@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, memo } from "react";
 import { useModals } from "~/components/common";
 import { CompanyModal } from "~/components/CompanyModal";
 
+import { useSpinner } from "~/hooks/spinner";
+
 const STATES = {
 	LOGIN_SCREEN: 0,
 	TABLE_SCREEN: 1
@@ -12,6 +14,16 @@ const Main = memo(() => {
 
 	const overlayObj = useModals();
 	const { summonModal, removeModal } = overlayObj;
+
+	const [spin, stop] = useSpinner();
+
+	useEffect(() => {
+		spin();
+
+		setTimeout(() => {
+			stop();
+		}, 2000);
+	}, []);
 
 	const click = () => {
 		let id = null;

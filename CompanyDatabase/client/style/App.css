@@ -193,3 +193,8 @@ body {
 		}
 	}
 }
+
+.spinner {
+	color: var(--text-color);
+	font-size: 40px;
+}
