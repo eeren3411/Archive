@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-import { Overlay } from "./ModalProvider.module.css";
+import { Overlay } from "./modals.module.css";
 
 const ModalWrapper = ({
 	modal

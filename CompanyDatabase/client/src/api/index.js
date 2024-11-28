@@ -1,2 +1,1 @@
-export * from './companyApi.js';
-export * from './authApi.js';
+export { default } from './api-client.js';

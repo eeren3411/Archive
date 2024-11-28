@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from "react";
-import { useModals } from "~/components/common";
-import { CompanyModal } from "~/components/CompanyModal";
+import { useModals } from "~/components/common/modals";
+import CompanyModal from "~/components/company-modal";
 
 import { useSpinner } from "~/hooks/spinner";
 

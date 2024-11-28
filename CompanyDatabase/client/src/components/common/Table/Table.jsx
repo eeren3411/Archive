@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, memo } from 'react';
-import { CustomTable, Controller, Sortable, asc, desc, OneLinerColumn, MultiLinerColumn, ButtonColumn } from './Table.module.css';
+import { CustomTable, Controller, Sortable, asc, desc, OneLinerColumn, MultiLinerColumn, ButtonColumn } from './table.module.css';
 import { FaRegTrashAlt, FaEdit } from 'react-icons/fa'
 
 const TableRow = memo(({

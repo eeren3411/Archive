@@ -1,4 +1,4 @@
-import apiClient from "./apiClient.js";
+import apiClient from "../api-client.js";
 
 export function getCurrentSalt () {
 	return apiClient.get('/auth/salt');

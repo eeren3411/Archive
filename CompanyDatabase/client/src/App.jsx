@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
-import { AlertProvider, ModalProvider } from "~/components/common";
-import Main from "./Main.jsx";
+import { AlertProvider } from "./components/common/alert";
+import { ModalProvider } from "./components/common/modals";
+import Main from "./main.jsx";
 
 const App = () => {
 	return (

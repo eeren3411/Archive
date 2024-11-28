@@ -1,7 +1,7 @@
 import React from "react";
 import { faker } from "@faker-js/faker";
 
-import { ModalContainer, ModalHeader, ModalCloseButton, ModalBody, ModalButtonContainer, ModalButton } from "./CompanyModal.module.css";
+import { ModalContainer, ModalHeader, ModalCloseButton, ModalBody, ModalButtonContainer, ModalButton } from "./company-modal.module.css";
 
 const CompanyModal = ({
 	data = {},

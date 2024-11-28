@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { ImSpinner9 } from "react-icons/im";
-import { useModals } from "~/components/common"
+import { useModals } from "~/components/common/modals"
 
-import { Spinner } from "./Spinner.module.css"
+import { Spinner } from "./spinner.module.css"
 
 const SpinnerComponent = () => {
 	return (

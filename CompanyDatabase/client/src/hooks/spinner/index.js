@@ -1,1 +1,1 @@
-export {  useSpinner } from './spinner.jsx';
+export { useSpinner } from './spinner.jsx';

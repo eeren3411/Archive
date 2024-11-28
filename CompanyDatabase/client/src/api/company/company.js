@@ -1,4 +1,4 @@
-import apiClient from "./apiClient.js";
+import apiClient from "../api-client.js";
 
 export function getCompany(id) {
 	return apiClient.get(`/companies?id=${id}`);
